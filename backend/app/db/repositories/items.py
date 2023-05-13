@@ -116,7 +116,6 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
         tag: Optional[str] = None,
         seller: Optional[str] = None,
         favorited: Optional[str] = None,
-        title: Optional[str] = None,
         limit: int = 20,
         offset: int = 0,
         requested_user: Optional[User] = None,
@@ -124,58 +123,31 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
         query_params: List[Union[str, int]] = []
         query_params_count = 0
 
-        if title:
-            query = Query.from_(
-                items,
-            ).select(
-                items.id,
-                items.slug,
-                items.title,
-                items.description,
-                items.body,
-                items.image,
-                items.created_at,
-                items.updated_at,
-                Query.from_(
-                    users,
-                ).where(
-                    users.id == items.seller_id,
-                ).select(
-                    users.username,
-                ).as_(
-                    SELLER_USERNAME_ALIAS,
-                ),
+        # fmt: off
+        query = Query.from_(
+            items,
+        ).select(
+            items.id,
+            items.slug,
+            items.title,
+            items.description,
+            items.body,
+            items.image,
+            items.created_at,
+            items.updated_at,
+            Query.from_(
+                users,
             ).where(
-                title in items.title
-            ).orderby(
-                items.created_at, order=Order.desc,
-            )
-        else:
-            # fmt: off
-            query = Query.from_(
-                items,
+                users.id == items.seller_id,
             ).select(
-                items.id,
-                items.slug,
-                items.title,
-                items.description,
-                items.body,
-                items.image,
-                items.created_at,
-                items.updated_at,
-                Query.from_(
-                    users,
-                ).where(
-                    users.id == items.seller_id,
-                ).select(
-                    users.username,
-                ).as_(
-                    SELLER_USERNAME_ALIAS,
-                ),
-            ).orderby(
-                items.created_at, order=Order.desc,
-            )
-            # fmt: on
+                users.username,
+            ).as_(
+                SELLER_USERNAME_ALIAS,
+            ),
+        ).orderby(
+            items.created_at, order=Order.desc,
+        )
+        # fmt: on
 
         if tag:
             query_params.append(tag)
@@ -236,7 +208,6 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
                 ),
             )
             # fmt: on
-
 
         query = query.limit(Parameter(query_params_count + 1)).offset(
             Parameter(query_params_count + 2),

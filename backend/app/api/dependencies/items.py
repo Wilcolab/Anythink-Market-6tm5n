@@ -22,7 +22,6 @@ def get_items_filters(
     tag: Optional[str] = None,
     seller: Optional[str] = None,
     favorited: Optional[str] = None,
-    title: Optional[str] = None,
     limit: int = Query(DEFAULT_ITEMS_LIMIT, ge=1),
     offset: int = Query(DEFAULT_ITEMS_OFFSET, ge=0),
 ) -> ItemsFilters:
@@ -32,7 +31,6 @@ def get_items_filters(
         favorited=favorited,
         limit=limit,
         offset=offset,
-        title=title
     )
 
 
