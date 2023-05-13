@@ -9,5 +9,7 @@ Please find more info about each part in the relevant Readme file ([frontend](fr
 When implementing a new feature or fixing a bug, please create a new pull request against `main` from a feature/bug branch and add `@vanessa-cooper` as reviewer.
 
 ## First setup
-
-**[TODO 05/01/2018 @vanessa-cooper]:** _It's been a while since anyone ran a fresh copy of this repo. I think it's worth documenting the steps needed to install and run the repo on a new machine?_
+- install ([Docker](https://docs.docker.com/get-docker/))
+- make sure that docker is ready by running the following commands in your terminal `docker -v` and `docker-compose -v`
+- run `docker-compose up` from the project root directory to load backend and frontend.
+- you can test the app by creating a new user http://localhost:3001/register
