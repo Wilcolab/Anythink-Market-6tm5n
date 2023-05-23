@@ -2,6 +2,7 @@ from typing import List, Optional, Sequence, Union
 
 from asyncpg import Connection, Record
 from pypika import Query, Order
+from pypika.functions import Lower
 
 from app.db.errors import EntityDoesNotExist
 from app.db.queries.queries import queries
@@ -115,6 +116,7 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
         *,
         tag: Optional[str] = None,
         seller: Optional[str] = None,
+        title: Optional[str] = None,
         favorited: Optional[str] = None,
         limit: int = 20,
         offset: int = 0,
@@ -123,31 +125,58 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
         query_params: List[Union[str, int]] = []
         query_params_count = 0
 
-        # fmt: off
-        query = Query.from_(
-            items,
-        ).select(
-            items.id,
-            items.slug,
-            items.title,
-            items.description,
-            items.body,
-            items.image,
-            items.created_at,
-            items.updated_at,
-            Query.from_(
-                users,
-            ).where(
-                users.id == items.seller_id,
+        if title:
+            query = Query.from_(
+                items,
             ).select(
-                users.username,
-            ).as_(
-                SELLER_USERNAME_ALIAS,
-            ),
-        ).orderby(
-            items.created_at, order=Order.desc,
-        )
-        # fmt: on
+                items.id,
+                items.slug,
+                items.title,
+                items.description,
+                items.body,
+                items.image,
+                items.created_at,
+                items.updated_at,
+                Query.from_(
+                    users,
+                ).where(
+                    users.id == items.seller_id,
+                ).select(
+                    users.username,
+                ).as_(
+                    SELLER_USERNAME_ALIAS,
+                ),
+            ).where(
+                Lower(items.title).like(f"%{title}%")
+            ).orderby(
+                items.created_at, order=Order.desc,
+            )
+        else:
+            # fmt: off
+            query = Query.from_(
+                items,
+            ).select(
+                items.id,
+                items.slug,
+                items.title,
+                items.description,
+                items.body,
+                items.image,
+                items.created_at,
+                items.updated_at,
+                Query.from_(
+                    users,
+                ).where(
+                    users.id == items.seller_id,
+                ).select(
+                    users.username,
+                ).as_(
+                    SELLER_USERNAME_ALIAS,
+                ),
+            ).orderby(
+                items.created_at, order=Order.desc,
+            )
+            # fmt: on
 
         if tag:
             query_params.append(tag)
@@ -208,6 +237,7 @@ class ItemsRepository(BaseRepository):  # noqa: WPS214
                 ),
             )
             # fmt: on
+
 
         query = query.limit(Parameter(query_params_count + 1)).offset(
             Parameter(query_params_count + 2),
